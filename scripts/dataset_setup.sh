@@ -18,19 +18,18 @@ else
 fi
 
 echo "set up training file"
-train_dir=$WMT/home/steven/Code/GITHUB/ParaCrawl/wmt2021/paracrawl8
+train_dir=$WMT/paracrawl8
 laser_file=$train_dir/paracrawl-release8.en-ha.bifixed.dedup.laser.filter-0.9
 xml_file=$train_dir/paracrawl-release8.en-ha.bifixed.raw.tmx
 
 
 if [ ! -e "$train_data/laser" ]; then
     echo "set up laser training file"
-    mkdir -p $train_data/laser
+    mkdir -p $train_data/laser 
     awk -F '\t' '{print $2}' $laser_file >> $train_data/laser/ha-en.en
     awk -F '\t' '{print $3}' $laser_file >> $train_data/laser/ha-en.ha
 fi
 
 if [ ! -e "$train_data/paracrawl" ]; then
     echo "set up paracrawl training file"
-    
 fi
