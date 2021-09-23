@@ -28,17 +28,19 @@ DATA_FOLDER=/export/b02/wtan/data-bin/ha-en
 CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en
 
 fairseq-train $DATA_FOLDER \
-	--max-epoch 30 \
+	--max-epoch 50 \
+    --train-subset train \
+    --valid-subset valid \
 	-s ha -t en \
-	--share-decoder-input-output-embed \
-	--encoder-embed-dim 512 \
 	--arch transformer_wmt_en_de \
 	--optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0.0 \
 	--lr-scheduler inverse_sqrt --warmup-init-lr 1e-07 --warmup-updates 1000 \
-	--lr 5e-4 --min-lr 1e-06 \
+	--lr 5e-4 \
 	--dropout 0.3 --weight-decay 0.0001 \
 	--criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
 	--max-tokens 1024 --update-freq 4 \
-	--save-dir $CHECKPOINT_FOLDER
-done
+    --max-update 4000 \
+    --seed 1 \
+	--log-interval 5 \
+	--save-dir $CHECKPOINT_FOLDER		
 																             
