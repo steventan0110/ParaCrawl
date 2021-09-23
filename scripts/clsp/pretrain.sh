@@ -40,5 +40,4 @@ fairseq-train $DATA_FOLDER \
 	--criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
 	--max-tokens 1024 --update-freq 4 \
 	--save-dir $CHECKPOINT_FOLDER
-done
 																             
