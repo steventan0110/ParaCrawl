@@ -57,18 +57,18 @@ if [ "1" == "2" ]; then
             fi
         done
     done
-else
-    for l in ha en; do
-        cp $datasets/train/laser/bpe/ha-en.$l $datasets/train.$l
-        cp $datasets/dev/bpe/ha-en.$l $datasets/dev.$l
-    done
-    # apply fairseq preprocess
-    fairseq-preprocess \
-        --source-lang ha --target-lang en \
-        --joined-dictionary \
-        --trainpref $datasets/train \
-        --validpref $datasets/dev \
-        --destdir $ROOT/data-bin/ha \
-        --workers 8
+fi 
 
-fi
+
+for l in ha en; do
+    cp $datasets/train/laser/bpe/ha-en.$l $datasets/train.$l
+    cp $datasets/dev/bpe/ha-en.$l $datasets/dev.$l
+done
+# apply fairseq preprocess
+fairseq-preprocess \
+    --source-lang ha --target-lang en \
+    --joined-dictionary \
+    --trainpref $datasets/train \
+    --validpref $datasets/dev \
+    --destdir $ROOT/data-bin/ha-en \
+    --workers 8
