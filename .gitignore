@@ -1,6 +1,8 @@
 /datasets
 /data-bin
 /wmt2021
+/checkpoints
+/output
 /crawl
 # Byte-compiled / optimized / DLL files
 __pycache__/
