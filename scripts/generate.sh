@@ -7,7 +7,7 @@ source $ROOT/crawl/bin/activate
 CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en
 DATA_FOLDER=$ROOT/data-bin/ha-en
 filename="transformer"
-if false; then
+if true; then
     fairseq-generate $DATA_FOLDER \
         --task translation \
         --gen-subset valid \
@@ -16,7 +16,7 @@ if false; then
         --lenpen 1.0 \
         --remove-bpe \
         -s ha -t en \
-        --beam 5 >> $output_dir/$filename.out	
+        --beam 10 >> $output_dir/$filename.out	
 fi
 
 # detokenize and score	
