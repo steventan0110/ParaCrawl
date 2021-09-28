@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # (See qsub section for explanation on these flags.)
-#$ -N pretrain-ha-en
+#$ -N pretrain-ha-en-1e-4
 #$ -j y -o $JOB_NAME-$JOB_ID.out
 #$ -M wtan12@jhu.edu
 #$ -m e
@@ -25,17 +25,18 @@ WORK_DIR=/home/wtan12/ParaCrawl
 conda activate crawl
 
 DATA_FOLDER=/export/b02/wtan/data-bin/ha-en
-CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en
+CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-1e-4
 
 fairseq-train $DATA_FOLDER \
 	--max-epoch 50 \
-    --train-subset train \
-    --valid-subset valid \
+    	--train-subset train \
+    	--valid-subset valid \
 	-s ha -t en \
 	--arch transformer_wmt_en_de \
+	--share-decoder-input-output-embed \
 	--optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0.0 \
-	--lr-scheduler inverse_sqrt --warmup-init-lr 1e-07 --warmup-updates 1000 \
-	--lr 5e-4 \
+	--lr-scheduler inverse_sqrt --warmup-init-lr 1e-07 --warmup-updates 4000 \
+	--lr 1e-4 \
 	--dropout 0.3 --weight-decay 0.0001 \
 	--criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
 	--max-tokens 1024 --update-freq 4 \
