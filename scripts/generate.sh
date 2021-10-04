@@ -1,16 +1,17 @@
 moses_scripts=/home/steven/Code/GITHUB/mosesdecoder/scripts
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
-output_dir=$ROOT/output/ha-en
+lr=1e-4
+output_dir=$ROOT/output/ha-en-$lr
 mkdir -p $output_dir
 source $ROOT/crawl/bin/activate
 
-CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en
+CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en-$lr
 DATA_FOLDER=$ROOT/data-bin/ha-en
 filename="transformer"
 if true; then
     fairseq-generate $DATA_FOLDER \
         --task translation \
-        --gen-subset valid \
+        --gen-subset test \
         --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
         --batch-size 64 \
         --lenpen 1.0 \

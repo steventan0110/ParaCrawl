@@ -4,6 +4,7 @@
 /checkpoints
 /output
 /crawl
+/document-aligner
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
