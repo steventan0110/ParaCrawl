@@ -35,9 +35,9 @@ extracted_e=$dir/v2.en-$language.en.extracted
 extracted_f=$dir/v2.en-$language.$language.extracted
 extracted_translated=$dir/v2.en-$language.$language.translated
 
-# # treanslate
-# zcat $extracted_f.gz | xz - > $txt.xz && rm $extracted_f.gz
-# zcat $extracted_e.gz | xz - > $english.xz
+# treanslate
+zcat $extracted_f.gz | xz - > $txt.xz && rm $extracted_f.gz
+zcat $extracted_e.gz | xz - > $english.xz
 # $LIB/translate-foreign.perl $txt.xz $language | xz - > $translated.xz
 # rm $txt.xz.dedup $txt.xz.dedup.moses.log $txt.xz.dedup.translated
 # paste <(xzcat $txt.xz | cut -f 1) <(xzcat $translated.xz) | gzip - > $extracted_translated.gz
