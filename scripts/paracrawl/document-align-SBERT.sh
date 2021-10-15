@@ -38,8 +38,24 @@ extracted_f=$dir/v2.en-$language.$language.extracted
 extracted_translated=$dir/v2.en-$language.$language.translated
 
 # feed extracted file into Pretrained model as well as SBERT to compute similarity
-bash translate-extract.sh ${extracted_e} ${extracted_f} ${extracted_translated} ${dir}
+if [ ! -e ${extracted_translated} ]; then
+  bash translate-extract.sh ${extracted_e} ${extracted_f} ${extracted_translated} ${dir}
+fi
 
+# compute match with SBERT
+bert_match=$dir/v2.$language.sbert.matches
+cmd="${ROOT}/SBERT/document_sim.py \
+  --src ${extracted_translated} \
+  --tgt ${extracted_e} \
+  --threshold 0.0 \
+  --output-file ${bert_match}
+"
+echo $cmd
+#python $ROOT/SBERT/document_sim.py \
+#  --src ${extracted_translated} \
+#  --tgt ${extracted_e} \
+#  --threshold 0.0 \
+#  --output-dir ${bert_match}
 
 
 ## treanslate
