@@ -1,5 +1,5 @@
 import shutil
-
+import os
 
 def main():
 	kohen_data_prefix = '/home/pkoehn/statmt/data/site-crawl/data'
@@ -14,8 +14,9 @@ def main():
 			continue
 		lett_file = f'{kohen_data_prefix}/{folder}/v2.lett.xz'
 		tgt_dir = f'{output_dir}/{folder}'
-		print(tgt_dir)
-		# shutil.copy(lett_file, output_dir)
+		if not os.path.exists(tgt_dir):
+			os.mkdir(tgt_dir)
+		shutil.copy(lett_file, tgt_dir)
 
 
 if __name__ == '__main__':
