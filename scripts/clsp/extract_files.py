@@ -1,5 +1,7 @@
 import shutil
 import glob
+
+
 def main():
 	kohen_data_prefix = '/home/pkoehn/statmt/data/site-crawl/data'
 	get_sent_file = '/home/wtan12/ParaCrawl/all-files-for-one-language.has-sent.ha'
@@ -11,9 +13,10 @@ def main():
 		folder = line.split('\t')[0]
 		lett_file = f'{kohen_data_prefix}/{folder}/v2.lett.xz'
 		output_dir = f'{output_dir}/{folder}'
-		print(lett_file, output_dir)
-		# shutil.copy(lett_file, output_dir)
+		print(lett_file)
+		# print(lett_file, output_dir)
+	# shutil.copy(lett_file, output_dir)
 
 
 if __name__ == '__main__':
-    main()
+	main()
