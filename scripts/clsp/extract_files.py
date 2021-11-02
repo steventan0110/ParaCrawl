@@ -10,11 +10,12 @@ def main():
 
 	for line in data.split('\n'):
 		folder = line.split('\t')[0]
+		if len(folder) < 1:
+			continue
 		lett_file = f'{kohen_data_prefix}/{folder}/v2.lett.xz'
 		tgt_dir = f'{output_dir}/{folder}'
 		print(tgt_dir)
-		# print(lett_file, output_dir)
-	# shutil.copy(lett_file, output_dir)
+		# shutil.copy(lett_file, output_dir)
 
 
 if __name__ == '__main__':
