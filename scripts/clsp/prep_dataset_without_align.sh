@@ -3,6 +3,8 @@ dir=/export/b02/wtan/dataset/lett
 language=ha
 MALIGN_DOCALIGN=${HOME}/ParaCrawl/document-aligner
 
+conda activate crawl
+
 legacy_lett () {
   if [ -e $1.gz ] && [ ! -e $1.xz ]; then
     zcat $1.gz | xz - > $1.xz && rm $1.gz
@@ -15,6 +17,10 @@ extract_lett() {
   extracted_f=${extract_dir}/v2.en-$language.$language.extracted
   if [ -f ${extracted_e}.gz ] || [ -f ${extracted_e} ]; then
     # already extracted
+    rm -f ${extracted_e}
+    rm -f ${extracted_e}.gz
+    rm -f ${extracted_f}
+    rm -f ${extracted_f}.gz
     return
   fi
   # extract foreign and english text
