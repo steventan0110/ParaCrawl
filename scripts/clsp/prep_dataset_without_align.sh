@@ -70,7 +70,7 @@ cat ${all_lett_en} | cut -f2 > ${all_text_en}
 cat ${all_lett_ha} | cut -f2 > ${all_text_ha}
 
 # dedup the files
-cd /home/steven/Code/GITHUB/preprocess/build/bin
+cd ${ROOT}/preprocess/build/bin
 ./dedupe < ${all_text_en} > ${all_text_en}.dedup
 ./dedupe < ${all_text_ha} > ${all_text_ha}.dedup
 cd $ROOT
