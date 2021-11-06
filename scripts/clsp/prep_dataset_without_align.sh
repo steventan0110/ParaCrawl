@@ -50,6 +50,7 @@ for sharded_dir in ${dir}/*; do
     echo ${sharded_dir} ' not a directory'
     continue
   fi
+  echo "working on " ${sharded_dir}
   lett_file_prefix=${sharded_dir}/v2.lett
   legacy_lett ${lett_file_prefix} # convert legacy gz file into xz format
   lett_file=${lett_file_prefix}.xz
