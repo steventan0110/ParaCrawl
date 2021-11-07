@@ -28,7 +28,7 @@ cat ${all_sent} | cut -f3 > ${sent_en}
 cat ${all_sent} | cut -f4 > ${sent_ha}
 
 # dedup the files
-cd /home/steven/Code/GITHUB/preprocess/build/bin
+cd ${ROOT}/preprocess/build/bin
 ./dedupe < ${sent_en} > ${sent_en}.dedup
 ./dedupe < ${sent_ha} > ${sent_ha}.dedup
 cd $ROOT

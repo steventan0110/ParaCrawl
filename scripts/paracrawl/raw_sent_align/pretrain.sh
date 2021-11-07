@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # (See qsub section for explanation on these flags.)
-#$ -N pretrain-ha-en-1e-4
+#$ -N pretrain-ha-en-sent-align
 #$ -j y -o $JOB_NAME-$JOB_ID.out
 #$ -M wtan12@jhu.edu
 #$ -m e
@@ -24,11 +24,11 @@ WORK_DIR=/home/wtan12/ParaCrawl
 
 conda activate crawl
 
-DATA_FOLDER=/export/b02/wtan/data-bin/ha-en
-CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-1e-4
+DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-raw
+CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-raw/lr-1e-4
 
 fairseq-train $DATA_FOLDER \
-	--max-epoch 50 \
+	--max-epoch 20 \
   --train-subset train \
   --valid-subset valid \
 	-s ha -t en \
@@ -43,4 +43,4 @@ fairseq-train $DATA_FOLDER \
   --seed 1 \
 	--log-interval 5 \
 	--save-dir $CHECKPOINT_FOLDER
-																             
+
