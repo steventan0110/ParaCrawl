@@ -61,8 +61,6 @@ if false; then
         done
     done
   fi
-
-
 fi
 
 # apply fairseq preprocess
