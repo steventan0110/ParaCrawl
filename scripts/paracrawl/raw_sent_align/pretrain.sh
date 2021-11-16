@@ -24,8 +24,8 @@ WORK_DIR=/home/wtan12/ParaCrawl
 
 conda activate crawl
 
-DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-raw
-CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-raw/lr-1e-4
+DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-dedup
+CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-dedup/lr-1e-4
 
 fairseq-train $DATA_FOLDER \
 	--max-epoch 20 \

@@ -11,12 +11,17 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 
 
-datasets=$ROOT/datasets/raw_sent_align/
+datasets=$ROOT/datasets/raw_sent_align_dedup/
+# rm -r $datasets
+
 if [[ ! -e $datasets ]]; then
-  cp $ROOT/datasets/lett/sent.en-ha.en $datasets
-  cp $ROOT/datasets/lett/sent.en-ha.ha $datasets
-  mv $datasets/sent.en-ha.en $datasets/train.ha-en.en
-  mv $datasets/sent.en-ha.ha $datasets/train.ha-en.ha
+  mkdir -p $datasets
+  cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
+  cp ${ROOT}/datasets/raw_sent_align/test* $datasets
+  cp $ROOT/datasets/lett/sent.en-ha.en.dedup $datasets
+  cp $ROOT/datasets/lett/sent.en-ha.ha.dedup $datasets
+  mv $datasets/sent.en-ha.en.dedup $datasets/train.ha-en.en
+  mv $datasets/sent.en-ha.ha.dedup $datasets/train.ha-en.ha
 fi
 
 # use true if BPE not learned yet
@@ -70,5 +75,5 @@ fairseq-preprocess \
     --trainpref $datasets/bpe/train.ha-en \
     --validpref $datasets/bpe/dev.ha-en \
     --testpref $datasets/bpe/test.ha-en \
-    --destdir $ROOT/data-bin/ha-en-sent-align-raw \
+    --destdir $ROOT/data-bin/ha-en-sent-align-dedup \
     --workers 8

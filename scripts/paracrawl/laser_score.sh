@@ -2,7 +2,7 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 dir=/home/steven/Code/GITHUB/ParaCrawl/datasets/lett
 sent_ha=${dir}/sent.en-ha.ha.dedup
 sent_en=${dir}/sent.en-ha.en.dedup
-output=${dir}/sent.en-ha.laser
+output=${dir}/sent.en-ha.mine-laser
 
 export LASER=/home/steven/Code/GITHUB/ParaCrawl/scripts/paracrawl/LASER
 export LASER_SCORING=/home/steven/Code/GITHUB/ParaCrawl/scripts/paracrawl/laser-scoring
@@ -10,7 +10,7 @@ model_dir="${LASER}/models"
 encoder="${model_dir}/bilstm.93langs.2018-12-26.pt"
 bpe_codes="${model_dir}/93langs.fcodes"
 
-conda activate crawl
+conda conda crawl
 
 Embed () {
   ll=$1
@@ -27,17 +27,21 @@ Embed () {
    fi
 }
 
-Embed en ${sent_en} ${sent_en}.embed
-Embed ha ${sent_ha} ${sent_ha}.embed
+Process () {
+  #Embed en ${sent_en} ${sent_en}.embed
+  #Embed ha ${sent_ha} ${sent_ha}.embed
+  Embed en $1.en $2.en.embed
+  Embed ha $1.ha $2.ha.embed
 
+  python3 ${LASER}/source/mine_bitexts.py \
+      ${sent_en} ${sent_ha} \
+      --src-lang en --trg-lang ha \
+      --src-embeddings ${sent_en}.embed \
+      --trg-embeddings ${sent_ha}.embed \
+      --mode score --retrieval max --margin ratio -k 4  \
+      --output ${output} --verbose --gpu --unify
+}
 
-python3 ${LASER}/source/mine_bitexts.py \
-    ${sent_en} ${sent_ha} \
-    --src-lang en --trg-lang ha \
-    --src-embeddings ${sent_en}.embed \
-    --trg-embeddings ${sent_ha}.embed \
-    --mode score --retrieval max --margin ratio -k 4  \
-    --output ${output} --verbose --gpu --unify
 
 # python $ROOT/scripts/paracrawl/laser_score.py --file1 ${sent_en} --file2 ${sent_ha} -o ${output}
 

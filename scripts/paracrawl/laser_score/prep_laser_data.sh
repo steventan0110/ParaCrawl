@@ -28,7 +28,7 @@ datasets=${ROOT}/datasets/laser_align
 cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
 cp ${ROOT}/datasets/raw_sent_align/test* $datasets
 # use true if BPE not learned yet
-if true; then
+if false; then
   # use moses to tokenize text before BPE
   if [[ ! -e $datasets/tok ]]; then
     mkdir $datasets/tok
@@ -87,7 +87,7 @@ if true; then
 fi
 
 # apply fairseq preprocess
-for threshold in 0.75 0.8 0.85 0.9; do
+for threshold in 0.0; do
   fairseq-preprocess \
     --source-lang ha --target-lang en \
     --joined-dictionary \
