@@ -3,7 +3,7 @@
 threshold=0.0
 mine=true
 # (See qsub section for explanation on these flags.)
-#$ -N pretrain-ha-en-lasers-${threshold}
+#$ -N pretrain-ha-en-lasers-mine-0.0
 #$ -j y -o $JOB_NAME-$JOB_ID.out
 #$ -M wtan12@jhu.edu
 #$ -m e
@@ -26,7 +26,7 @@ WORK_DIR=/home/wtan12/ParaCrawl
 
 conda activate crawl
 
-if mine; then
+if $mine; then
   DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-mine-${threshold}
   CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-mine-${threshold}
 else
@@ -36,7 +36,7 @@ fi
 
 
 fairseq-train $DATA_FOLDER \
-	--max-epoch 50 \
+	--max-epoch 100 \
   --train-subset train \
   --valid-subset valid \
 	-s ha -t en \
@@ -49,6 +49,7 @@ fairseq-train $DATA_FOLDER \
 	--criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
 	--max-tokens 1024 --update-freq 4 \
   --seed 1 \
-	--log-interval 5 \
+	--log-interval 100 \
+	--save-interval 5 \
 	--save-dir $CHECKPOINT_FOLDER
 																             
