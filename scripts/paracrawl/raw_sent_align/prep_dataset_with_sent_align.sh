@@ -38,13 +38,24 @@ sent_en=${dir}/sent.en-ha.en
 sent_ha_en=${dir}/sent.en-ha
 #paste ${sent_en} ${sent_ha} > ${sent_ha_en}
 
+# dedup on each language individually
+laser_mine=/home/steven/Code/GITHUB/ParaCrawl/datasets/laser_mine
+mkdir -p $laser_mine
+sent_ha=${laser_mine}/sent.en-ha.ha
+sent_en=${laser_mine}/sent.en-ha.en
+cat ${all_sent} | cut -f3 > ${sent_en}
+cat ${all_sent} | cut -f4 > ${sent_ha}
+cd /home/steven/Code/GITHUB/preprocess/build/bin
+./dedupe < ${sent_en} > ${sent_en}.dedup
+./dedupe < ${sent_ha} > ${sent_ha}.dedup
 
-# dedup the files
+
+# dedup the src-tgt together and use laser score instead of laser mine
 cd /home/steven/Code/GITHUB/preprocess/build/bin
 # ./dedupe < ${sent_ha_en} > ${sent_ha_en}.dedup
 #./dedupe < ${sent_en} > ${sent_en}.dedup
 #./dedupe < ${sent_ha} > ${sent_ha}.dedup
-cd $ROOT
+#cd $ROOT
 
-cat ${sent_ha_en}.dedup | cut -f2 > ${sent_ha}.dedup
-cat ${sent_ha_en}.dedup | cut -f1 > ${sent_en}.dedup
+#cat ${sent_ha_en}.dedup | cut -f2 > ${sent_ha}.dedup
+#cat ${sent_ha_en}.dedup | cut -f1 > ${sent_en}.dedup

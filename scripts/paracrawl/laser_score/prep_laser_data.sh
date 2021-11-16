@@ -1,10 +1,11 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 dir=/home/steven/Code/GITHUB/ParaCrawl/datasets/lett
-laser_score=${dir}/sent.en-ha.laser
-output_dir=${ROOT}/datasets/laser_align
+# laser_score=${dir}/sent.en-ha.dedup.filter.laser
+output_dir=${ROOT}/datasets/laser_mine
+laser_score=${ROOT}/datasets/laser_mine/filter.laser
 mkdir -p $output_dir
 output_file=${output_dir}/train.ha-en
-for threshold in 0.75 0.8 0.85 0.9; do
+for threshold in 0.0 0.7 0.75 0.8 0.85 0.9; do
   if [ ! -e ${output_file}-${threshold}.en ]; then
     echo "filter corpus with threshold score " $threshold
     python filter_corpus_with_laser.py --lang ha --threshold ${threshold} --input $laser_score --output ${output_file}
@@ -24,17 +25,17 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 
 
-datasets=${ROOT}/datasets/laser_align
+datasets=${ROOT}/datasets/laser_mine
 cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
 cp ${ROOT}/datasets/raw_sent_align/test* $datasets
 # use true if BPE not learned yet
-if false; then
+if true; then
   # use moses to tokenize text before BPE
   if [[ ! -e $datasets/tok ]]; then
     mkdir $datasets/tok
     for mode in train dev test; do
       for l in ha en; do
-        for threshold in 0.75 0.8 0.85 0.9; do
+        for threshold in 0.0 0.7 0.75 0.8 0.85 0.9; do
           if [ $mode == 'train' ]; then
             cat ${datasets}/${mode}.ha-en-${threshold}.$l | \
               perl $norm_punc $l | \
@@ -54,7 +55,7 @@ if false; then
 
   if [[ ! -e $datasets/bpe ]]; then
     mkdir $datasets/bpe
-    for threshold in 0.75 0.8 0.85 0.9; do
+    for threshold in 0.0 0.7 0.75 0.8 0.85 0.9; do
       TRAIN=$datasets/bpe/train.ha-en-${threshold}
       rm -f $TRAIN
       for l in ha en; do
@@ -87,14 +88,14 @@ if false; then
 fi
 
 # apply fairseq preprocess
-for threshold in 0.0; do
+for threshold in 0.0 0.7 0.75 0.8 0.85 0.9; do
   fairseq-preprocess \
     --source-lang ha --target-lang en \
     --joined-dictionary \
     --trainpref $datasets/bpe/train.ha-en-${threshold} \
     --validpref $datasets/bpe/dev.ha-en-${threshold} \
     --testpref $datasets/bpe/test.ha-en-${threshold} \
-    --destdir $ROOT/data-bin/ha-en-sent-align-laser-${threshold} \
+    --destdir $ROOT/data-bin/ha-en-sent-align-laser-mine-${threshold} \
     --workers 8
 done
 

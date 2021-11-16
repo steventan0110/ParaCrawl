@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-threshold=0.75
+threshold=0.0
+mine=true
 # (See qsub section for explanation on these flags.)
 #$ -N pretrain-ha-en-lasers-${threshold}
 #$ -j y -o $JOB_NAME-$JOB_ID.out
@@ -25,8 +26,13 @@ WORK_DIR=/home/wtan12/ParaCrawl
 
 conda activate crawl
 
-DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-${threshold}
-CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-${threshold}
+if mine; then
+  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-mine-${threshold}
+  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-mine-${threshold}
+else
+  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-${threshold}
+  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-${threshold}
+fi
 
 
 fairseq-train $DATA_FOLDER \

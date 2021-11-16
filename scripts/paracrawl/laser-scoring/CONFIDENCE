@@ -1,0 +1,177 @@
+#!/bin/bash
+
+echo $0 $*
+set -e # fail script if one command fails
+source activate vecalign
+export LASER=/home/steven/Code/GITHUB/ParaCrawl/scripts/paracrawl/LASER
+export LASER_SCORING=/home/steven/Code/GITHUB/ParaCrawl/scripts/paracrawl/laser-scoring
+model_dir="${LASER}/models"
+encoder="${model_dir}/bilstm.93langs.2018-12-26.pt"
+bpe_codes="${model_dir}/93langs.fcodes"
+
+usage()
+{
+    echo "usage: CONFIDENCE -l LANGUAGE -f FILE [--filter-overlap RATIO] [--filter-language] [--filter-min COUNT] [--filter-max COUNT] [--gpu GPU] [--split 500000] [--english LANGUAGE]"
+    echo "FILE is TAB-separated English and foreign"
+    exit
+}
+
+E="en"
+while [ "$1" != "" ]; do
+    case $1 in
+        -l | --language )       shift
+                                LANGUAGE=$1
+                                ;;
+        -e | --english )        shift
+                                E=$1
+                                ;;
+        -f | --file )           shift
+                                FILE=$1
+                                ;;
+        -s | --split )          shift
+                                SPLIT=$1
+                                ;;
+        -g | --gpu )            shift
+                                GPU=$1
+                                ;;
+        -o | --filter-overlap ) shift
+                                FILTER_OVERLAP=" --overlap $1"
+                                ;;
+        -i | --filter-language ) FILTER_LANGUAGE=" -l $LANGUAGE"
+                                ;;
+        -m | --filter-min )     shift
+                                FILTER_MIN=" --min-length $1"
+                                ;;
+        -x | --filter-max )     shift
+                                FILTER_MAX=" --max-length $1"
+                                ;;
+        -h | --help )           usage
+                                ;;
+        * )                     usage
+    esac
+    shift
+done
+
+if [[ "$FILE" == "" || "$LANGUAGE" == "" ]]; then
+  usage
+fi
+
+if [ "$GPU" != "" ]; then
+  export CUDA_VISIBLE_DEVICES=$GPU
+fi
+
+# run pre-filtering, if requested
+if [ "$FILTER_OVERLAP$FILTER_LANGUAGE$FILTER_MIN$FILTER_MAX" != "" ]; then
+  FILE_FILTER=$FILE.filtered
+  if [ ! -s $FILE_FILTER.xz ] ; then
+    if [ -s "$FILE" ] ; then
+      cat $FILE | python $LASER_SCORING/filter-stdio.py$FILTER_OVERLAP$FILTER_LANGUAGE$FILTER_MIN$FILTER_MAX -i $FILE.index -e $E | xz - > $FILE_FILTER.xz
+    elif [ -s "$FILE.xz" ] ; then
+      echo "xzcat $FILE.xz | python $LASER_SCORING/filter-stdio.py$FILTER_OVERLAP$FILTER_LANGUAGE$FILTER_MIN$FILTER_MAX -i $FILE.index -e $E | xz - > $FILE_FILTER.xz"
+      xzcat $FILE.xz | python $LASER_SCORING/filter-stdio.py$FILTER_OVERLAP$FILTER_LANGUAGE$FILTER_MIN$FILTER_MAX -i $FILE.index -e $E | xz - > $FILE_FILTER.xz
+    fi
+  fi
+else
+  FILE_FILTER=$FILE
+fi
+
+# split into English and foreign file, if not already provided
+if [ ! -s "$FILE_FILTER.e" ] ; then
+  xzcat $FILE_FILTER.xz | cut -f 1 > $FILE_FILTER.e
+  CREATED_E=1
+fi
+
+if [ ! -s "$FILE_FILTER.f" ] ; then
+  xzcat $FILE_FILTER.xz | cut -f 2 > $FILE_FILTER.f
+  CREATED_F=1
+fi
+
+mkdir -p $FILE.tmp
+export TMPDIR=$FILE.tmp
+
+Embed () {
+  ll=$1
+  txt=$2
+  embed=$3
+
+  if [ ! -s ${embed} ] ; then
+    cat ${txt} | python3 ${LASER}/source/embed.py \
+      --encoder ${encoder} \
+      --token-lang ${ll} \
+      --bpe-codes ${bpe_codes} \
+      --output ${embed} \
+      --verbose
+   fi
+}
+
+Process () {
+  Embed $E $1.e $1.e.embed
+  Embed $LANGUAGE $1.f $1.f.embed
+
+  python3 ${LASER}/source/mine_bitexts.py \
+    $1.e $1.f \
+    --src-lang $E --trg-lang $LANGUAGE \
+    --src-embeddings $1.e.embed \
+    --trg-embeddings $1.f.embed \
+    --mode score --retrieval max --margin ratio -k 4  \
+    --output $1.laser --verbose --gpu --unify
+
+  xz $1.laser
+  rm $1.e.embed $1.f.embed
+}
+
+# run the process, in parts if so specified
+if [ "$SPLIT" == "" ]; then
+  Process $FILE_FILTER 
+else
+  # not started yet -> split into parts
+  if [ ! -s "$FILE.tmp/00000.laser.xz" ] ; then
+    split -a 5 -d -l $SPLIT $FILE_FILTER.e $FILE.tmp/e.
+    split -a 5 -d -l $SPLIT $FILE_FILTER.f $FILE.tmp/f.
+  fi
+  # process one part at a time
+  files=$(ls $FILE.tmp | grep ^e......$)
+  file_array=($files)
+  echo "Split into ${#file_array[@]} parts."
+  for part in $files
+  do
+    id="${part:2:5}"
+    if [ -e $FILE.tmp/e.$id ] ; then
+      echo "Process part $id at $(date)"
+      mv $FILE.tmp/e.$id $FILE.tmp/$id.e
+      mv $FILE.tmp/f.$id $FILE.tmp/$id.f
+      if [ ! -s "$FILE.tmp/$id.laser.xz" ] ; then
+        Process $FILE.tmp/$id
+      fi
+      rm $FILE.tmp/$id.e $FILE.tmp/$id.f
+    fi
+  done
+  # check if everything is complete
+  for part in $files
+  do
+    id="${part:2:5}"
+    if [ ! -s "$FILE.tmp/$id.laser.xz" ] ; then
+      exit
+    fi
+  done
+  xzcat $FILE.tmp/*laser.xz | xz - > $FILE_FILTER.laser.xz
+  #rm $FILE.tmp/*laser.xz
+fi
+
+if [ "$FILTER_OVERLAP$FILTER_LANGUAGE$FILTER_MIN$FILTER_MAX" != "" ]; then
+  if [ -s "$FILE" ] ; then
+    python $LASER_SCORING/add-zero-scores.py -i $FILE.index -o $FILE -s <(xzcat $FILE_FILTER.laser.xz) | xz - > $FILE.laser.xz
+  else
+    python $LASER_SCORING/add-zero-scores.py -i $FILE.index -o <(xzcat $FILE.xz) -s <(xzcat $FILE_FILTER.laser.xz) | xz - > $FILE.laser.xz
+  fi
+  #rm $FILE.index $FILE_FILTER.laser.xz $FILE_FILTER.xz
+fi
+
+# cleaning up
+#rmdir $FILE.tmp
+if [ "$CREATED_E" != "" ]; then
+  rm $FILE_FILTER.e
+fi
+if [ "$CREATED_F" != "" ]; then
+  rm $FILE_FILTER.f
+fi
