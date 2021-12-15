@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 threshold=0.0
-mine=true
+lr=1e-4
+mine=false
 # (See qsub section for explanation on these flags.)
-#$ -N pretrain-ha-en-lasers-${threshold}
+#$ -N pretrain-ha-en-lasers-0.0
 #$ -j y -o $JOB_NAME-$JOB_ID.out
 #$ -M wtan12@jhu.edu
 #$ -m e
@@ -30,8 +31,8 @@ if mine; then
   DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-mine-${threshold}
   CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-mine-${threshold}
 else
-  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-${threshold}
-  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-${threshold}
+  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-laser-${threshold}
+  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-laser-${threshold}
 fi
 
 
@@ -44,11 +45,11 @@ fairseq-train $DATA_FOLDER \
 	--share-decoder-input-output-embed \
 	--optimizer adam --adam-betas '(0.9, 0.98)' --clip-norm 0.0 \
 	--lr-scheduler inverse_sqrt --warmup-init-lr 1e-07 --warmup-updates 4000 \
-	--lr 1e-4 \
+	--lr ${lr} \
 	--dropout 0.3 --weight-decay 0.0001 \
 	--criterion label_smoothed_cross_entropy --label-smoothing 0.1 \
 	--max-tokens 1024 --update-freq 4 \
   --seed 1 \
 	--log-interval 5 \
-	--save-dir $CHECKPOINT_FOLDER
+	--save-dir $CHECKPOINT_FOLDER/${lr}
 																             
