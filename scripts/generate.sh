@@ -1,14 +1,14 @@
 moses_scripts=/home/steven/Code/GITHUB/mosesdecoder/scripts
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 lr=1e-4
-prefix=ha-en-sent-align-dedup
+prefix=ha-en-laser-0.95
 # prefix=ha-en-sent-align-laser-0.75
-output_dir=$ROOT/output/${prefix}/lr-${lr}
+output_dir=$ROOT/output/${prefix}/${lr}
 mkdir -p $output_dir
 source $ROOT/crawl/bin/activate
 
 # CHECKPOINT_FOLDER=$ROOT/checkpoints/${prefix}/lr-${lr}
-CHECKPOINT_FOLDER=$ROOT/checkpoints/${prefix}/
+CHECKPOINT_FOLDER=$ROOT/checkpoints/${prefix}/${lr}
 DATA_FOLDER=$ROOT/data-bin/${prefix}
 filename="transformer"
 if true; then
