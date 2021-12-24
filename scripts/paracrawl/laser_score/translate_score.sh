@@ -15,21 +15,26 @@ source $ROOT/crawl/bin/activate
 datasets=$ROOT/datasets/sent_sim
 mkdir -p $datasets
 # prepare all data
-# cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
-# cp ${ROOT}/datasets/raw_sent_align/test* $datasets
-# cat ${ROOT}/datasets/laser_align/en-ha.laser | cut -f2 > ${datasets}/train.ha-en.en
-# cat ${ROOT}/datasets/laser_align/en-ha.laser | cut -f3 > ${datasets}/train.ha-en.ha
+cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
+cp ${ROOT}/datasets/raw_sent_align/test* $datasets
+cat ${ROOT}/datasets/laser_align/en-ha.laser \
+  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
+  | cut -f2 > ${datasets}/train.ha-en.en
+
+cat ${ROOT}/datasets/laser_align/en-ha.laser \
+  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
+  | cut -f3 > ${datasets}/train.ha-en.ha
 
 # tokenize and BPE the dataset
-#for l in ha en; do
-#cat ${datasets}/train.ha-en.$l | \
-#  perl $norm_punc $l | \
-#  perl $rem_non_print_char | \
-#  perl $tokenizer -threads 8 -a -l $l > ${datasets}/$l.tok
-#done
-#
-#python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ha.tok > ${datasets}/bpe.ha
-#python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/en.tok > ${datasets}/bpe.en
+for l in ha en; do
+cat ${datasets}/train.ha-en.$l | \
+  perl $norm_punc $l | \
+  perl $rem_non_print_char | \
+  perl $tokenizer -threads 8 -a -l $l > ${datasets}/$l.tok
+done
+
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ha.tok > ${datasets}/bpe.ha
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/en.tok > ${datasets}/bpe.en
 
 
 if true; then
@@ -37,15 +42,17 @@ rm -r ${datasets}/data-bin
 mkdir -p ${datasets}/data-bin
 lr=1e-4
 CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en-$lr
+
+
 # interactive is too slow, use preprocess+generate instead // have to use interactive because it keeps the order
 cp ${ROOT}/data-bin/ha-en/dict.* ${datasets}/data-bin
-fairseq-interactive ${datasets}/data-bin \
-  --input ${datasets}/bpe.ha \
-  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
-  --lenpen 1.0 \
-  --remove-bpe \
-  -s ha -t en \
-  --beam 10 > ${datasets}/fairseq_out
+#fairseq-interactive ${datasets}/data-bin \
+#  --input ${datasets}/bpe.ha \
+#  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
+#  --lenpen 1.0 \
+#  --remove-bpe \
+#  -s ha -t en \
+#  --beam 10 > ${datasets}/fairseq_out
 
 # apply fairseq preprocess
 #fairseq-preprocess \

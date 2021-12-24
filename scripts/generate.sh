@@ -1,7 +1,7 @@
 moses_scripts=/home/steven/Code/GITHUB/mosesdecoder/scripts
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 lr=1e-4
-prefix=ha-en-laser-0.95
+prefix=ha-en-laser-0.6
 # prefix=ha-en-sent-align-laser-0.75
 output_dir=$ROOT/output/${prefix}/${lr}
 mkdir -p $output_dir
@@ -24,8 +24,8 @@ if true; then
 fi
 
 # detokenize and score	
-cat $output_dir/$filename.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl >> $output_dir/$filename.out.detok
-cat $output_dir/$filename.out | grep ^T | cut -f2- | $moses_scripts/tokenizer/detokenizer.perl >> $output_dir/$filename.ref.detok
+cat $output_dir/$filename.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > $output_dir/$filename.out.detok
+cat $output_dir/$filename.out | grep ^T | cut -f2- | $moses_scripts/tokenizer/detokenizer.perl > $output_dir/$filename.ref.detok
 
 # score with sacrebleu
 echo "The BLEU score is: "

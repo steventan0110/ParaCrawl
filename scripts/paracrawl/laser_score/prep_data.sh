@@ -4,9 +4,9 @@ output_dir=${ROOT}/datasets/laser_align
 laser_score=${ROOT}/datasets/laser_align/en-ha.laser
 
 # retrieve sentence of score larger than a threshold
-#cat $laser_score \
-#  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.95;' \
-#  > ${laser_score}.0.95
+cat $laser_score \
+  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.95;' \
+  > ${laser_score}.0.95
 
 
 # prepare dataset for training
