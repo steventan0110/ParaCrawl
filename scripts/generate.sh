@@ -1,7 +1,7 @@
 moses_scripts=/home/steven/Code/GITHUB/mosesdecoder/scripts
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 lr=1e-4
-prefix=ha-en-laser-0.6
+prefix=ha-en-sent-sim-0.95
 # prefix=ha-en-sent-align-laser-0.75
 output_dir=$ROOT/output/${prefix}/${lr}
 mkdir -p $output_dir
