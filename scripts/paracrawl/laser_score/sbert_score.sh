@@ -18,14 +18,14 @@ if [ ! -e ${datasets}/sent-sim.en ]; then
   cat ${datasets}/sent-sim.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim.en
 fi
 
-mkdir -p ${datasets}/filter
+# mkdir -p ${datasets}/filter
 #cp ${datasets}/train.ha-en.en ${datasets}/filter/ha-en.en
 #cp ${datasets}/sent-sim-filter.en ${datasets}/filter/translate.en
 #cp ${datasets}/train.ha-en.ha ${datasets}/filter/ha-en.ha
 # score the pair
 
-echo "python sent_sim_sbert.py \
-  --src-file ${datasets}/filter/ha-en.ha \
-  --tgt-file ${datasets}/filter/ha-en.en \
-  --translate-file ${datasets}/filter/translate.en
-  --output-file ${datasets}/filter/ha-en.score"
+python sent_sim_sbert.py \
+  --src-file ${datasets}/all/ha-en.ha \
+  --tgt-file ${datasets}/all/ha-en.en \
+  --translate-file ${datasets}/all/translate.en \
+  --output-file ${datasets}/all/ha-en.score

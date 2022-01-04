@@ -1,9 +1,9 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
-sent_score=${ROOT}/datasets/sent_sim/filter/ha-en.score
-output_dir=${ROOT}/datasets/sent_sim_line
+sent_score=${ROOT}/datasets/sent_sim/all/ha-en.score
+output_dir=${ROOT}/datasets/sent_sim_line_all
 mkdir -p $output_dir
 output_file=${output_dir}/train.ha-en
-for threshold in 100000 200000 300000 400000 500000 600000 700000 800000; do
+for threshold in 100000 200000 300000 400000 500000 600000 700000; do
   if [ ! -e ${output_file}-${threshold}.en ]; then
     echo "filter corpus with threshold score to certain #lines " $threshold
     python filter_corpus_with_laser.py \
@@ -26,7 +26,7 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 
 
-datasets=${ROOT}/datasets/sent_sim_line
+datasets=${ROOT}/datasets/sent_sim_line_all
 cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
 cp ${ROOT}/datasets/raw_sent_align/test* $datasets
 # use true if BPE not learned yet
@@ -36,7 +36,7 @@ if true; then
     mkdir $datasets/tok
     for mode in train dev test; do
       for l in ha en; do
-        for threshold in 100000 200000 300000 400000 500000 600000 700000 800000; do
+        for threshold in 100000 200000 300000 400000 500000 600000 700000; do
           if [ $mode == 'train' ]; then
             cat ${datasets}/${mode}.ha-en-${threshold}.$l | \
               perl $norm_punc $l | \
@@ -56,7 +56,7 @@ if true; then
 
   if [[ ! -e $datasets/bpe ]]; then
     mkdir $datasets/bpe
-    for threshold in 100000 200000 300000 400000 500000 600000 700000 800000; do
+    for threshold in 100000 200000 300000 400000 500000 600000 700000; do
       TRAIN=$datasets/bpe/train.ha-en-${threshold}
       rm -f $TRAIN
       for l in ha en; do
@@ -89,14 +89,14 @@ if true; then
 fi
 
 # apply fairseq preprocess
-for threshold in 100000 200000 300000 400000 500000 600000 700000 800000; do
+for threshold in 100000 200000 300000 400000 500000 600000 700000; do
   fairseq-preprocess \
     --source-lang ha --target-lang en \
     --joined-dictionary \
     --trainpref $datasets/bpe/train.ha-en-${threshold} \
     --validpref $datasets/bpe/dev.ha-en-${threshold} \
     --testpref $datasets/bpe/test.ha-en-${threshold} \
-    --destdir $ROOT/data-bin/ha-en-sent-sim-line-${threshold} \
+    --destdir $ROOT/data-bin/ha-en-sent-simall-line-${threshold} \
     --workers 8
 done
 
