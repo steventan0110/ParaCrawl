@@ -9,42 +9,44 @@ rem_non_print_char=$moses_scripts/tokenizer/remove-non-printing-char.perl
 # use pretrained BPE model to be consistent
 BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
-pretrain_dataset=$ROOT/datasets/sent_sim_line_it1
-BPECODE=${pretrain_dataset}/bpe/code-500000
+pretrain_dataset=$ROOT/datasets/km_laser
+BPECODE=${pretrain_dataset}/bpe/code-2
 source $ROOT/crawl/bin/activate
-datasets=$ROOT/datasets/sent_sim_it2
+datasets=$ROOT/datasets/km/it0
 mkdir -p $datasets
 # prepare all data
-cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
-cp ${ROOT}/datasets/raw_sent_align/test* $datasets
-cat ${ROOT}/datasets/laser_align/en-ha.laser \
+cp ${ROOT}/datasets/km_laser/dev* $datasets
+cp ${ROOT}/datasets/km_laser/test* $datasets
+cat ${ROOT}/datasets/km_laser/km-en.laser \
   | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
-  | cut -f2 > ${datasets}/train.ha-en.en
+  | cut -f2 > ${datasets}/train.km-en.en
 
-cat ${ROOT}/datasets/laser_align/en-ha.laser \
+cat ${ROOT}/datasets/km_laser/km-en.laser \
   | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
-  | cut -f3 > ${datasets}/train.ha-en.ha
+  | cut -f3 > ${datasets}/train.km-en.km
 
 # tokenize and BPE the dataset
-for l in ha en; do
-cat ${datasets}/train.ha-en.$l | \
+for l in km en; do
+cat ${datasets}/train.km-en.$l | \
   perl $norm_punc $l | \
   perl $rem_non_print_char | \
   perl $tokenizer -threads 8 -a -l $l > ${datasets}/$l.tok
 done
 
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ha.tok > ${datasets}/bpe.ha
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/km.tok > ${datasets}/bpe.km
 python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/en.tok > ${datasets}/bpe.en
 
 
 if true; then
 mkdir -p ${datasets}/data-bin
-lr=1e-4
-CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en-$lr
+#rm -r ${datasets}/data-bin
+#mkdir -p ${datasets}/data-bin
+#lr=1e-3
+#CHECKPOINT_FOLDER=$ROOT/checkpoints/ps-en-$lr
 
 
 # interactive is too slow, use preprocess+generate instead // have to use interactive because it keeps the order
-cp ${ROOT}/data-bin/ha-en-sent-sim-it1-500000/dict.* ${datasets}/data-bin
+cp ${ROOT}/data-bin/km-en-laser-2/dict.* ${datasets}/data-bin
 #fairseq-interactive ${datasets}/data-bin \
 #  --input ${datasets}/bpe.ha \
 #  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \

@@ -9,42 +9,44 @@ rem_non_print_char=$moses_scripts/tokenizer/remove-non-printing-char.perl
 # use pretrained BPE model to be consistent
 BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
-pretrain_dataset=$ROOT/datasets/sent_sim_line_it1
-BPECODE=${pretrain_dataset}/bpe/code-500000
+pretrain_dataset=$ROOT/datasets/ps_laser
+BPECODE=${pretrain_dataset}/bpe/code-2
 source $ROOT/crawl/bin/activate
-datasets=$ROOT/datasets/sent_sim_it2
+datasets=$ROOT/datasets/ps/it0
 mkdir -p $datasets
 # prepare all data
-cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
-cp ${ROOT}/datasets/raw_sent_align/test* $datasets
-cat ${ROOT}/datasets/laser_align/en-ha.laser \
-  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
-  | cut -f2 > ${datasets}/train.ha-en.en
+cp ${ROOT}/datasets/ps_laser/dev* $datasets
+cp ${ROOT}/datasets/ps_laser/test* $datasets
+cat ${ROOT}/datasets/ps_laser/ps-en.laser \
+  | perl -ne '@a=split(/\t/); print $_ if $a[0]>-1;' \
+  | cut -f2 > ${datasets}/train.ps-en.en
 
-cat ${ROOT}/datasets/laser_align/en-ha.laser \
-  | perl -ne '@a=split(/\t/); print $_ if $a[0]>0.0;' \
-  | cut -f3 > ${datasets}/train.ha-en.ha
+cat ${ROOT}/datasets/ps_laser/ps-en.laser \
+  | perl -ne '@a=split(/\t/); print $_ if $a[0]>-1;' \
+  | cut -f3 > ${datasets}/train.ps-en.ps
 
 # tokenize and BPE the dataset
-for l in ha en; do
-cat ${datasets}/train.ha-en.$l | \
+for l in ps en; do
+cat ${datasets}/train.ps-en.$l | \
   perl $norm_punc $l | \
   perl $rem_non_print_char | \
   perl $tokenizer -threads 8 -a -l $l > ${datasets}/$l.tok
 done
 
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ha.tok > ${datasets}/bpe.ha
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ps.tok > ${datasets}/bpe.ps
 python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/en.tok > ${datasets}/bpe.en
 
 
 if true; then
 mkdir -p ${datasets}/data-bin
-lr=1e-4
-CHECKPOINT_FOLDER=$ROOT/checkpoints/ha-en-$lr
+#rm -r ${datasets}/data-bin
+#mkdir -p ${datasets}/data-bin
+#lr=1e-3
+#CHECKPOINT_FOLDER=$ROOT/checkpoints/ps-en-$lr
 
 
 # interactive is too slow, use preprocess+generate instead // have to use interactive because it keeps the order
-cp ${ROOT}/data-bin/ha-en-sent-sim-it1-500000/dict.* ${datasets}/data-bin
+cp ${ROOT}/data-bin/ps-en-laser-2/dict.* ${datasets}/data-bin
 #fairseq-interactive ${datasets}/data-bin \
 #  --input ${datasets}/bpe.ha \
 #  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \

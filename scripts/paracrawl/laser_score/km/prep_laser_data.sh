@@ -27,7 +27,7 @@ clean=$moses_scripts/training/clean-corpus-n.perl
 norm_punc=$moses_scripts/tokenizer/normalize-punctuation.perl
 rem_non_print_char=$moses_scripts/tokenizer/remove-non-printing-char.perl
 
-BPE_TOKENS=8000
+BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate

@@ -73,9 +73,9 @@ def store_embedding(args):
 	tgt_embeddings = model.encode(tgt_sentences)
 	trans_embeddings = model.encode(trans_sentences)
 	print(f'Using pickle protocol: {pickle.HIGHEST_PROTOCOL}')
-	with open('tgt-embeddings-all.pkl', "wb") as fOut:
+	with open('tgt-embeddings-it1.pkl', "wb") as fOut:
 		pickle.dump({'sentences': tgt_sentences, 'embeddings': tgt_embeddings}, fOut, protocol=pickle.HIGHEST_PROTOCOL)
-	with open('trans-embeddings-all.pkl', "wb") as fOut:
+	with open('trans-embeddings-it1.pkl', "wb") as fOut:
 		pickle.dump({'sentences': trans_sentences, 'embeddings': trans_embeddings}, fOut,
 		            protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -84,7 +84,7 @@ def calculate_score(args):
 	from torch import nn
 	import torch
 	cos = nn.CosineSimilarity(dim=0, eps=1e-6)
-	with open('tgt-embeddings-all.pkl', "rb") as f1, open('trans-embeddings-all.pkl', 'rb') as f2:
+	with open('tgt-embeddings-it1.pkl', "rb") as f1, open('trans-embeddings-it1.pkl', 'rb') as f2:
 		data1 = pickle.load(f1)
 		data2 = pickle.load(f2)
 		tgt_sentences = data1['sentences']
@@ -110,7 +110,7 @@ def main(args):
 		raise Exception('Missing Input Files')
 
 	# only need to run once
-	# store_embedding(args)
+	store_embedding(args)
 	calculate_score(args)
 
 

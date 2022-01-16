@@ -5,6 +5,7 @@
 /output
 /models
 /crawl
+/dev-tools
 /document-aligner
 /preprocess
 # Byte-compiled / optimized / DLL files

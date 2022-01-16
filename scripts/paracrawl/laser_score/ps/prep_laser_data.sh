@@ -10,7 +10,7 @@ cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.ps-en.en ${output_
 cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.ps-en.ps ${output_dir}/test.ps-en.ps
 cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.ps-en.en ${output_dir}/test.ps-en.en
 output_file=${output_dir}/train.ps-en
-for threshold in 2 3 5; do
+for threshold in 2 3 5 7; do
   if [ ! -e ${output_file}-${threshold}.en ]; then
     echo "filter corpus with threshold score to certain #lines " $threshold
     python ${ROOT}/scripts/paracrawl/laser_score/filter_corpus_with_laser.py \
@@ -27,7 +27,7 @@ clean=$moses_scripts/training/clean-corpus-n.perl
 norm_punc=$moses_scripts/tokenizer/normalize-punctuation.perl
 rem_non_print_char=$moses_scripts/tokenizer/remove-non-printing-char.perl
 
-BPE_TOKENS=8000
+BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
@@ -39,7 +39,7 @@ if true; then
     mkdir $datasets/tok
     for mode in train dev test; do
       for l in ps en; do
-        for threshold in 2 3 5; do
+        for threshold in 2 3 5 7; do
           if [ $mode == 'train' ]; then
             cat ${datasets}/${mode}.ps-en-${threshold}.$l | \
               perl $norm_punc $l | \
@@ -59,7 +59,7 @@ if true; then
 
   if [[ ! -e $datasets/bpe ]]; then
     mkdir $datasets/bpe
-    for threshold in 2 3 5; do
+    for threshold in 2 3 5 7; do
       TRAIN=$datasets/bpe/train.ps-en-${threshold}
       rm -f $TRAIN
       for l in ps en; do
@@ -92,7 +92,7 @@ if true; then
 fi
 
 # apply fairseq preprocess
-for threshold in 2 3 5; do
+for threshold in 2 3 5 7; do
   fairseq-preprocess \
     --source-lang ps --target-lang en \
     --joined-dictionary \

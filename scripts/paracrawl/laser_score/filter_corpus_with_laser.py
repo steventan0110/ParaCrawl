@@ -55,7 +55,7 @@ def word_filter(args):
 	for text in bitext.split('\n'):
 		if len(text) < 1: continue
 		score, en, other = text.split('\t')
-		if float(score) == 0: continue # ignore worst samples
+		# if float(score) == 0: continue # ignore worst samples
 		m[(en, other)] = float(score)
 	sorted_map = sorted(m.items(), key=lambda x: x[1], reverse=True)
 	# threshold use small number like 2,3,4

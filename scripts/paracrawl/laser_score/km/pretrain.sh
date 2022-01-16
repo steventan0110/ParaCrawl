@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # (See qsub section for explanation on these flags.)
-#$ -N pretrain-km-en-0.1m
+#$ -N pretrain-km-en-2
 #$ -j y -o $JOB_NAME-$JOB_ID.out
 #$ -M wtan12@jhu.edu
 #$ -m e
@@ -23,8 +23,8 @@ source /home/gqin2/scripts/acquire-gpu
 WORK_DIR=/home/wtan12/ParaCrawl
 conda activate crawl
 
-DATA_FOLDER=/export/b02/wtan/data-bin/km-en-laser-100000
-CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/km-en-laser-100000/1e-3
+DATA_FOLDER=/export/b02/wtan/data-bin/km-en-laser-2
+CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/km-en-laser-2/1e-3
 
 fairseq-train $DATA_FOLDER \
   --source-lang km --target-lang en \
