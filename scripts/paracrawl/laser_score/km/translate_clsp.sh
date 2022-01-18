@@ -14,10 +14,21 @@
 
 dataset=/export/b02/wtan/dataset/km-en/
 CHECKPOINT_FOLDER=/export/b07/wtan12/checkpoints/km-en-laser-5/1e-3
-fairseq-interactive ${dataset}/data-bin \
-  --input ${datasets}/bpe.km \
-  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
-  --lenpen 1.0 \
-  --remove-bpe \
-  -s km -t en \
-  --beam 10
+#fairseq-interactive ${dataset}/data-bin \
+#  --input ${datasets}/bpe.km \
+#  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
+#  --lenpen 1.0 \
+#  --remove-bpe \
+#  -s km -t en \
+#  --beam 10
+
+fairseq-generate ${datasets}/data-bin \
+    --task translation \
+    --gen-subset train \
+    --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
+    --max-tokens 1024 \
+    --lenpen 1.0 \
+    --remove-bpe \
+    -s km -t en \
+    --skip-invalid-size-inputs-valid-test \
+    --beam 10

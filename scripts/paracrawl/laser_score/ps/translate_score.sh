@@ -27,26 +27,23 @@ cat ${ROOT}/datasets/ps_laser/ps-en.laser \
 
 # tokenize and BPE the dataset
 for l in ps en; do
-cat ${datasets}/train.ps-en.$l | \
-  perl $norm_punc $l | \
-  perl $rem_non_print_char | \
-  perl $tokenizer -threads 8 -a -l $l > ${datasets}/$l.tok
+  for mode in train dev test; do
+    cat ${datasets}/train.ps-en.$l | \
+      perl $norm_punc $l | \
+      perl $rem_non_print_char | \
+      perl $tokenizer -threads 8 -a -l $l > ${datasets}/${mode}.$l.tok
+  done
 done
 
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/ps.tok > ${datasets}/bpe.ps
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/en.tok > ${datasets}/bpe.en
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.ps.tok > ${datasets}/${mode}.bpe.ps
+python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.en.tok > ${datasets}/${mode}.bpe.en
 
 
 if true; then
 mkdir -p ${datasets}/data-bin
-#rm -r ${datasets}/data-bin
-#mkdir -p ${datasets}/data-bin
-#lr=1e-3
-#CHECKPOINT_FOLDER=$ROOT/checkpoints/ps-en-$lr
-
-
 # interactive is too slow, use preprocess+generate instead // have to use interactive because it keeps the order
-cp ${ROOT}/data-bin/ps-en-laser-5/dict.* ${datasets}/data-bin
+# cp ${ROOT}/data-bin/ps-en-laser-5/dict.* ${datasets}/data-bin
+
 #fairseq-interactive ${datasets}/data-bin \
 #  --input ${datasets}/bpe.ha \
 #  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
@@ -56,15 +53,15 @@ cp ${ROOT}/data-bin/ps-en-laser-5/dict.* ${datasets}/data-bin
 #  --beam 10 > ${datasets}/fairseq_out
 
 # apply fairseq preprocess
-#fairseq-preprocess \
-#    --source-lang ha --target-lang en \
-#    --joined-dictionary \
-#    --srcdict ${ROOT}/data-bin/ha-en/dict.ha.txt \
-#    --trainpref $datasets/train.ha-en \
-#    --validpref $datasets/dev.ha-en \
-#    --testpref $datasets/test.ha-en \
-#    --destdir ${datasets}/data-bin \
-#    --workers 8
+fairseq-preprocess \
+    --source-lang ps --target-lang en \
+    --srcdict ${ROOT}/data-bin/ps-en-laser-5/dict.ps.txt \
+    --tgtdict ${ROOT}/data-bin/ps-en-laser-5/dict.en.txt \
+    --trainpref $datasets/train.bpe \
+    --validpref $datasets/dev.bpe \
+    --testpref $datasets/test.bpe\
+    --destdir ${datasets}/data-bin \
+    --workers 8
 fi
 
 
