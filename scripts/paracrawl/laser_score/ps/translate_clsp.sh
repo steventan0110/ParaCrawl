@@ -18,10 +18,21 @@ conda activate crawl
 dataset=/export/b02/wtan/dataset/ps-en/
 CHECKPOINT_FOLDER=/export/b07/wtan12/checkpoints/ps-en-laser-5/1e-3
 
-fairseq-interactive ${dataset}/data-bin \
-  --input ${dataset}/bpe.ps \
-  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
-  --lenpen 1.0 \
-  --remove-bpe \
-  -s ps -t en \
-  --beam 10
+#fairseq-interactive ${dataset}/data-bin \
+#  --input ${dataset}/bpe.ps \
+#  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
+#  --lenpen 1.0 \
+#  --remove-bpe \
+#  -s ps -t en \
+#  --beam 10
+
+fairseq-generate ${dataset}/data-bin \
+    --task translation \
+    --gen-subset train \
+    --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
+    --max-tokens 1024 \
+    --lenpen 1.0 \
+    --remove-bpe \
+    -s ps -t en \
+    --skip-invalid-size-inputs-valid-test \
+    --beam 10

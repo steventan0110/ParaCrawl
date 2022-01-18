@@ -35,9 +35,10 @@ for l in ps en; do
   done
 done
 
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.ps.tok > ${datasets}/${mode}.bpe.ps
-python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.en.tok > ${datasets}/${mode}.bpe.en
-
+for mode in train dev test; do
+  python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.ps.tok > ${datasets}/${mode}.bpe.ps
+  python $BPEROOT/apply_bpe.py -c $BPECODE < ${datasets}/${mode}.en.tok > ${datasets}/${mode}.bpe.en
+done
 
 if true; then
 mkdir -p ${datasets}/data-bin
