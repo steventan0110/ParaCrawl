@@ -1,5 +1,5 @@
 #checkpoint_prefix=ha-en-sent-sim-it1
-checkpoint_prefix=ps-en-laser
+checkpoint_prefix=km-en-laser
 
 #for line in 100000 200000 300000 400000 500000 600000 700000; do
 #  tgt=/home/steven/Code/GITHUB/ParaCrawl/checkpoints/${checkpoint_prefix}-${line}/1e-4

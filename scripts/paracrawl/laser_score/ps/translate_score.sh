@@ -10,7 +10,7 @@ rem_non_print_char=$moses_scripts/tokenizer/remove-non-printing-char.perl
 BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
 pretrain_dataset=$ROOT/datasets/ps_laser
-BPECODE=${pretrain_dataset}/bpe/code-2
+BPECODE=${pretrain_dataset}/bpe/code-5
 source $ROOT/crawl/bin/activate
 datasets=$ROOT/datasets/ps/it0
 mkdir -p $datasets
@@ -46,7 +46,7 @@ mkdir -p ${datasets}/data-bin
 
 
 # interactive is too slow, use preprocess+generate instead // have to use interactive because it keeps the order
-cp ${ROOT}/data-bin/ps-en-laser-2/dict.* ${datasets}/data-bin
+cp ${ROOT}/data-bin/ps-en-laser-5/dict.* ${datasets}/data-bin
 #fairseq-interactive ${datasets}/data-bin \
 #  --input ${datasets}/bpe.ha \
 #  --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
