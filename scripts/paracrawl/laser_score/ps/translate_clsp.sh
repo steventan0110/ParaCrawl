@@ -7,15 +7,19 @@
 # Fill out RAM/memory (same thing) request,
 # the number of GPUs you want,
 # and the hostnames of the machines for special GPU models.
-#$ -l ram_free=10G,mem_free=20G,cpu
+#$ -l ram_free=10G,mem_free=20G,gpu=1,hostname=c0*|c1[123456789]
 
 # Submit to GPU queue
 #$ -q g.q
+source /home/gqin2/scripts/acquire-gpu
+
+conda activate crawl
 
 dataset=/export/b02/wtan/dataset/ps-en/
 CHECKPOINT_FOLDER=/export/b07/wtan12/checkpoints/ps-en-laser-5/1e-3
+
 fairseq-interactive ${dataset}/data-bin \
-  --input ${datasets}/bpe.ps \
+  --input ${dataset}/bpe.ps \
   --path $CHECKPOINT_FOLDER/checkpoint_best.pt \
   --lenpen 1.0 \
   --remove-bpe \
