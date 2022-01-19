@@ -11,19 +11,15 @@ BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
 datasets=$ROOT/datasets/ps/it0
 
-if [ ! -e ${datasets}/sent-sim.en ]; then
-  # cat ${datasets}/sent-sim-filter.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim-filter.en
-  cat ${datasets}/sent-sim.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim.en
-fi
-
 mkdir -p ${datasets}/filter
 cp ${datasets}/train.ps-en.en ${datasets}/filter/ps-en.en
-cp ${datasets}/sent-sim.en ${datasets}/filter/translate.en
+cp ${datasets}/sent-sim.out ${datasets}/filter/translate.ps-en
 cp ${datasets}/train.ps-en.ps ${datasets}/filter/ps-en.ps
 # score the pair
 
-echo "python sent_sim_sbert.py \
+echo "python ${ROOT}/scripts/paracrawl/laser_score/sent_sim_sbert.py \
   --src-file ${datasets}/filter/ps-en.ps \
   --tgt-file ${datasets}/filter/ps-en.en \
-  --translate-file ${datasets}/filter/translate.en \
-  --output-file ${datasets}/filter/ps-en.score"
+  --translate-file ${datasets}/filter/translate.ps-en \
+  --output-file ${datasets}/filter/ps-en.score \
+  --save-dir ${datasets}/filter --iteration 0"

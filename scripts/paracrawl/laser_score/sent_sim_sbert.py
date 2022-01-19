@@ -6,6 +6,8 @@ import argparse
 from pathlib import Path
 
 import tqdm
+import torch
+from torch import nn
 from sentence_transformers import SentenceTransformer
 import pickle
 
@@ -15,6 +17,10 @@ def parser_args():
 	parser.add_argument('--tgt-file', default=None, type=Path)
 	parser.add_argument('--translate-file', default=None, type=Path)
 	parser.add_argument('--output-file', default=None, type=Path)
+	parser.add_argument('--save-dir', default='.', type=Path)
+	parser.add_argument('--iteration', default='0', type=str)
+	parser.add_argument('--aligned', action='store_true')
+	parser.add_argument('--lang', default='ps', type=str)
 	args = parser.parse_args()
 	return args
 
@@ -59,6 +65,66 @@ def retrieve_plot():
 	plt.scatter(x, y)
 	plt.show()
 
+def store_embedding_align(args):
+	# we only need the generation file cuz it has src tgt and hyp
+	with open(args.translate_file, 'r') as f1:
+		data = f1.read()
+
+	src_sentences, tgt_sentences, hyp_sentences = "", "", ""
+	src, tgt, hyp = None, None, None
+	count = 0
+	for i, line in enumerate(data.split('\n')):
+		if line.startswith('S-'):
+			# store src
+			src = line.split('\t')[1]
+		elif line.startswith('T-'):
+			tgt = line.split('\t')[1]
+		elif line.startswith('H-'):
+			hyp = line.split('\t')[2]
+			# when reach hyp line, we add them to sentences
+			src_sentences += src
+			src_sentences += "\n"
+			tgt_sentences += tgt
+			tgt_sentences += "\n"
+			hyp_sentences += hyp
+			hyp_sentences += "\n"
+			src = None
+			tgt = None
+			hyp = None
+			count += 1
+	print(f'Aligned {count} lines, start to embed them')
+	model = SentenceTransformer('all-MiniLM-L6-v2')
+	tgt_embeddings = model.encode(tgt_sentences.split('\n'))
+	hyp_embeddings = model.encode(hyp_sentences.split('\n'))
+	print(f'Using pickle protocol: {pickle.HIGHEST_PROTOCOL}')
+	with open(f'{args.save_dir}/{args.lang}-embeddings-it{args.iteration}.pkl', "wb") as fOut:
+		pickle.dump({'src': src_sentences,
+		             'tgt': tgt_sentences,
+		             'hyp': hyp_sentences,
+		             'tgt_embeddings': tgt_embeddings,
+		             'hyp_embeddings': hyp_embeddings,
+		             }, fOut, protocol=pickle.HIGHEST_PROTOCOL)
+
+def calculate_score_align(args):
+	cos = nn.CosineSimilarity(dim=0, eps=1e-6)
+	with open(f'{args.save_dir}/{args.lang}-embeddings-it{args.iteration}.pkl', "rb") as f1:
+		data = pickle.load(f1)
+	src_sentences = data['src'].split('\n')
+	tgt_sentences = data['tgt'].split('\n')
+	assert len(src_sentences) == len(tgt_sentences)
+	tgt_embedding = torch.from_numpy(data['tgt_embeddings'])
+	hyp_embedding = torch.from_numpy(data['hyp_embeddings'])
+	out = ""
+	for i in range(len(src_sentences)):
+		score = cos(tgt_embedding[i, :], hyp_embedding[i, :])
+		out += str(score.item())
+		out += '\t'
+		out += tgt_sentences[i]
+		out += '\t'
+		out += src_sentences[i]
+		out += '\n'
+	with open(f'{args.output_file}', 'w') as f4:
+		f4.write(out)
 
 def store_embedding(args):
 	with open(args.tgt_file, 'r') as f1, open(args.translate_file, 'r') as f2:
@@ -73,18 +139,17 @@ def store_embedding(args):
 	tgt_embeddings = model.encode(tgt_sentences)
 	trans_embeddings = model.encode(trans_sentences)
 	print(f'Using pickle protocol: {pickle.HIGHEST_PROTOCOL}')
-	with open('tgt-embeddings-it2.pkl', "wb") as fOut:
+	with open(f'tgt-embeddings-it{args.iteration}.pkl', "wb") as fOut:
 		pickle.dump({'sentences': tgt_sentences, 'embeddings': tgt_embeddings}, fOut, protocol=pickle.HIGHEST_PROTOCOL)
-	with open('trans-embeddings-it2.pkl', "wb") as fOut:
+	with open(f'trans-embeddings-it{args.iteration}.pkl', "wb") as fOut:
 		pickle.dump({'sentences': trans_sentences, 'embeddings': trans_embeddings}, fOut,
 		            protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def calculate_score(args):
-	from torch import nn
-	import torch
 	cos = nn.CosineSimilarity(dim=0, eps=1e-6)
-	with open('tgt-embeddings-it2.pkl', "rb") as f1, open('trans-embeddings-it2.pkl', 'rb') as f2:
+	with open(f'tgt-embeddings-it{args.iteration}.pkl', "rb") as f1, \
+			open(f'trans-embeddings-it{args.iteration}.pkl', 'rb') as f2:
 		data1 = pickle.load(f1)
 		data2 = pickle.load(f2)
 		tgt_sentences = data1['sentences']
@@ -102,16 +167,21 @@ def calculate_score(args):
 			output += src_sent.rstrip("\n")
 			output += '\n'
 
-	with open(args.output_file, 'w') as f4:
+	with open(f'{args.output_file}', 'w') as f4:
 		f4.write(output)
 
 def main(args):
 	if args.src_file is None or args.tgt_file is None or args.translate_file is None:
 		raise Exception('Missing Input Files')
+	print(args)
+	if args.aligned:
+		store_embedding(args)
+		calculate_score(args)
+	else:
+		# need to manually align the sentences from translation file first
+		# store_embedding_align(args)
+		calculate_score_align(args)
 
-	# only need to run once
-	store_embedding(args)
-	calculate_score(args)
 
 
 

@@ -1,10 +1,10 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
-laser_score=${ROOT}/datasets/ps/wmt20-sent.en-ps.laser-score
-laser_file=${ROOT}/datasets/ps/wmt20-sent.en-ps
-output_dir=${ROOT}/datasets/ps_laser
+#laser_score=${ROOT}/datasets/ps/wmt20-sent.en-ps.laser-score
+#laser_file=${ROOT}/datasets/ps/wmt20-sent.en-ps
+output_dir=${ROOT}/datasets/ps_laser_it1
 mkdir -p $output_dir
 # put score together with sentence pairs
-paste ${laser_score} ${laser_file} > ${output_dir}/ps-en.laser
+# paste ${laser_score} ${laser_file} > ${output_dir}/ps-en.laser
 cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.ps-en.ps ${output_dir}/dev.ps-en.ps
 cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.ps-en.en ${output_dir}/dev.ps-en.en
 cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.ps-en.ps ${output_dir}/test.ps-en.ps
@@ -16,7 +16,7 @@ for threshold in 2 3 5 7; do
     python ${ROOT}/scripts/paracrawl/laser_score/filter_corpus_with_laser.py \
       --mode word \
       --lang ps --threshold ${threshold} \
-      --input ${output_dir}/ps-en.laser --output ${output_file}
+      --input ${ROOT}/datasets/ps/it0/filter/ps-en.score --output ${output_file}
   fi
 done
 
@@ -31,9 +31,9 @@ BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
-datasets=${ROOT}/datasets/ps_laser
+datasets=${output_dir}
 # use true if BPE not learned yet
-if true; then
+if false; then
   # use moses to tokenize text before BPE
   if [[ ! -e $datasets/tok ]]; then
     mkdir $datasets/tok
@@ -99,7 +99,7 @@ for threshold in 2 3 5 7; do
     --trainpref $datasets/bpe/train.ps-en-${threshold} \
     --validpref $datasets/bpe/dev.ps-en-${threshold} \
     --testpref $datasets/bpe/test.ps-en-${threshold} \
-    --destdir $ROOT/data-bin/ps-en-laser-${threshold} \
+    --destdir $ROOT/data-bin/ps-en-sim-${threshold} \
     --workers 8
 done
 
