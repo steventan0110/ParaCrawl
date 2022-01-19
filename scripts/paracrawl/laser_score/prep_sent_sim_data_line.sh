@@ -1,6 +1,6 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
-sent_score=${ROOT}/datasets/sent_sim_it1/filter/ha-en.score
-output_dir=${ROOT}/datasets/sent_sim_line_it1
+sent_score=${ROOT}/datasets/sent_sim_it2/filter/ha-en.score
+output_dir=${ROOT}/datasets/sent_sim_line_it2
 mkdir -p $output_dir
 output_file=${output_dir}/train.ha-en
 for threshold in 100000 200000 300000 400000 500000 600000 700000; do
@@ -26,7 +26,7 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 
 
-datasets=${ROOT}/datasets/sent_sim_line_it1
+datasets=${ROOT}/datasets/sent_sim_line_it2
 cp ${ROOT}/datasets/raw_sent_align/dev* $datasets
 cp ${ROOT}/datasets/raw_sent_align/test* $datasets
 # use true if BPE not learned yet
@@ -96,7 +96,7 @@ for threshold in 100000 200000 300000 400000 500000 600000 700000; do
     --trainpref $datasets/bpe/train.ha-en-${threshold} \
     --validpref $datasets/bpe/dev.ha-en-${threshold} \
     --testpref $datasets/bpe/test.ha-en-${threshold} \
-    --destdir $ROOT/data-bin/ha-en-sent-sim-it1-${threshold} \
+    --destdir $ROOT/data-bin/ha-en-sent-sim-it2-${threshold} \
     --workers 8
 done
 

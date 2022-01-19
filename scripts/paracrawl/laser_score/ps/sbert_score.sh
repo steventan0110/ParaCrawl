@@ -9,23 +9,21 @@ source $ROOT/crawl/bin/activate
 # use pretrained BPE model to be consistent
 BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
-pretrain_dataset=$ROOT/datasets/ha
-BPECODE=${pretrain_dataset}/train/laser/bpe/code
-datasets=$ROOT/datasets/sent_sim_it2
+datasets=$ROOT/datasets/ps/it0
 
 if [ ! -e ${datasets}/sent-sim.en ]; then
   # cat ${datasets}/sent-sim-filter.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim-filter.en
-  cat ${datasets}/sent-sim-it2.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim.en
+  cat ${datasets}/sent-sim.out | grep ^H | cut -f3- | $moses_scripts/tokenizer/detokenizer.perl > ${datasets}/sent-sim.en
 fi
 
 mkdir -p ${datasets}/filter
-cp ${datasets}/train.ha-en.en ${datasets}/filter/ha-en.en
+cp ${datasets}/train.ps-en.en ${datasets}/filter/ps-en.en
 cp ${datasets}/sent-sim.en ${datasets}/filter/translate.en
-cp ${datasets}/train.ha-en.ha ${datasets}/filter/ha-en.ha
+cp ${datasets}/train.ps-en.ps ${datasets}/filter/ps-en.ps
 # score the pair
 
-python sent_sim_sbert.py \
-  --src-file ${datasets}/filter/ha-en.ha \
-  --tgt-file ${datasets}/filter/ha-en.en \
+echo "python sent_sim_sbert.py \
+  --src-file ${datasets}/filter/ps-en.ps \
+  --tgt-file ${datasets}/filter/ps-en.en \
   --translate-file ${datasets}/filter/translate.en \
-  --output-file ${datasets}/filter/ha-en.score
+  --output-file ${datasets}/filter/ps-en.score"

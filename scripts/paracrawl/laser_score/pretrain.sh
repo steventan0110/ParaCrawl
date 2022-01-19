@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-
-threshold=0.0
-lr=1e-4
-mine=false
 # (See qsub section for explanation on these flags.)
 #$ -N pretrain-ha-en-lasers-0.0
 #$ -j y -o $JOB_NAME-$JOB_ID.out
@@ -17,6 +13,9 @@ mine=false
 # Submit to GPU queue
 #$ -q g.q
 
+threshold=100000
+lr=1e-4
+
 # Assign a free-GPU to your program (make sure -n matches the requested number of GPUs above)
 source /home/gqin2/scripts/acquire-gpu
 # or, less safely:
@@ -27,13 +26,9 @@ WORK_DIR=/home/wtan12/ParaCrawl
 
 conda activate crawl
 
-if mine; then
-  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-align-laser-mine-${threshold}
-  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-align-laser-mine-${threshold}
-else
-  DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-laser-${threshold}
-  CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-laser-${threshold}
-fi
+
+DATA_FOLDER=/export/b02/wtan/data-bin/ha-en-sent-sim-it2-${threshold}
+CHECKPOINT_FOLDER=/export/b02/wtan/checkpoints/ha-en-sent-sim-it2-${threshold}
 
 
 fairseq-train $DATA_FOLDER \
@@ -51,5 +46,6 @@ fairseq-train $DATA_FOLDER \
 	--max-tokens 1024 --update-freq 4 \
   --seed 1 \
 	--log-interval 5 \
+	--save-interval 5 \
 	--save-dir $CHECKPOINT_FOLDER/${lr}
 																             
