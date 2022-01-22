@@ -1,7 +1,7 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 #laser_score=${ROOT}/datasets/ps/wmt20-sent.en-ps.laser-score
 #laser_file=${ROOT}/datasets/ps/wmt20-sent.en-ps
-output_dir=${ROOT}/datasets/ps_laser_it1
+output_dir=${ROOT}/datasets/ps_laser_it1_temp
 mkdir -p $output_dir
 # put score together with sentence pairs
 # paste ${laser_score} ${laser_file} > ${output_dir}/ps-en.laser
@@ -92,14 +92,14 @@ if false; then
 fi
 
 # apply fairseq preprocess
-for threshold in 2 3 5 7; do
-  fairseq-preprocess \
-    --source-lang ps --target-lang en \
-    --joined-dictionary \
-    --trainpref $datasets/bpe/train.ps-en-${threshold} \
-    --validpref $datasets/bpe/dev.ps-en-${threshold} \
-    --testpref $datasets/bpe/test.ps-en-${threshold} \
-    --destdir $ROOT/data-bin/ps-en-sim-${threshold} \
-    --workers 8
-done
+#for threshold in 2 3 5 7; do
+#  fairseq-preprocess \
+#    --source-lang ps --target-lang en \
+#    --joined-dictionary \
+#    --trainpref $datasets/bpe/train.ps-en-${threshold} \
+#    --validpref $datasets/bpe/dev.ps-en-${threshold} \
+#    --testpref $datasets/bpe/test.ps-en-${threshold} \
+#    --destdir $ROOT/data-bin/ps-en-sim-${threshold} \
+#    --workers 8
+#done
 

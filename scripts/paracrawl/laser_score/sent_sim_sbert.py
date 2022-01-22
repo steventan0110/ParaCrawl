@@ -179,7 +179,7 @@ def main(args):
 		calculate_score(args)
 	else:
 		# need to manually align the sentences from translation file first
-		# store_embedding_align(args)
+		store_embedding_align(args)
 		calculate_score_align(args)
 
 

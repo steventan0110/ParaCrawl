@@ -47,6 +47,9 @@ def line_filter(args):
 		f2.write(ret_other)
 
 def word_filter(args):
+	# for statistics
+	from collections import defaultdict
+	length_counter = defaultdict(int)
 	ret_en = ""
 	ret_other = ""
 	m = dict()
@@ -62,12 +65,15 @@ def word_filter(args):
 	count = 0
 	i = 0
 	while count < int(args.threshold)*1000000:
+		length_counter[len(sorted_map[i][0][0].split(' '))] += 1
 		ret_en += sorted_map[i][0][0]
 		ret_en += '\n'
 		ret_other += sorted_map[i][0][1]
 		ret_other += '\n'
 		count += len(sorted_map[i][0][0].split(' '))
 		i += 1
+	print(length_counter)
+
 
 
 	with open(f'{args.output}-{int(args.threshold)}.en', 'w') as f1:

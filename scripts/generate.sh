@@ -1,8 +1,8 @@
 moses_scripts=/home/steven/Code/GITHUB/mosesdecoder/scripts
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 lr=1e-3
-# prefix=ha-en-sent-sim-it1-700000
-prefix=km-en-laser-7
+#prefix=ha-en-sent-sim-it2-700000
+prefix=km-sim-3
 # prefix=ha-en-sent-align-laser-0.75
 output_dir=$ROOT/output/${prefix}/${lr}
 mkdir -p $output_dir
@@ -12,7 +12,6 @@ source $ROOT/crawl/bin/activate
 CHECKPOINT_FOLDER=$ROOT/checkpoints/${prefix}/${lr}
 DATA_FOLDER=$ROOT/data-bin/${prefix}
 
-#DATA_FOLDER=$ROOT/data-bin/ha-en-sent-simall-line-700000
 filename="transformer"
 if true; then
     fairseq-generate $DATA_FOLDER \
