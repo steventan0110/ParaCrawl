@@ -1,3 +1,4 @@
+import math
 import os.path
 
 import numpy
@@ -20,7 +21,9 @@ def parser_args():
 	parser.add_argument('--save-dir', default='.', type=Path)
 	parser.add_argument('--iteration', default='0', type=str)
 	parser.add_argument('--aligned', action='store_true')
+	parser.add_argument('--margin', action='store_true')
 	parser.add_argument('--lang', default='ps', type=str)
+	parser.add_argument('--find-closet', action='store_true')
 	args = parser.parse_args()
 	return args
 
@@ -115,14 +118,60 @@ def calculate_score_align(args):
 	tgt_embedding = torch.from_numpy(data['tgt_embeddings'])
 	hyp_embedding = torch.from_numpy(data['hyp_embeddings'])
 	out = ""
-	for i in range(len(src_sentences)):
-		score = cos(tgt_embedding[i, :], hyp_embedding[i, :])
-		out += str(score.item())
-		out += '\t'
-		out += tgt_sentences[i]
-		out += '\t'
-		out += src_sentences[i]
-		out += '\n'
+	bin_size = 500  # fit in 5k lines to compute every time because of memory limitation
+	if args.margin:
+		k = 4  # hyperparam for neighbors, follow the original paper's config
+		for bin in range(math.floor(len(src_sentences) / bin_size)):
+			print(f'{bin * bin_size} lines processed')
+			start_idx = bin * bin_size
+			end_idx = min((bin + 1) * bin_size, len(src_sentences))
+			# bin_size x len_of_src
+			cos_xz = tgt_embedding[start_idx:end_idx, :].to(torch.device('cuda:0')) \
+			                @ (torch.transpose(hyp_embedding, 0, 1)).to(torch.device('cuda:0'))
+			cos_yz = hyp_embedding[start_idx:end_idx, :].to(torch.device('cuda:0')) \
+			         @ (torch.transpose(tgt_embedding, 0, 1)).to(torch.device('cuda:0'))
+			top_xz, _ = torch.topk(cos_xz, k, dim=1)
+			top_yz, _ = torch.topk(cos_yz, k, dim=1)
+			top_score_xz = torch.sum(top_xz, dim=1) / (2 * k)
+			top_score_yz = torch.sum(top_yz, dim=1) / (2 * k)
+			for i in range(end_idx-start_idx):
+				score = cos(tgt_embedding[i, :], hyp_embedding[i, :]) / (top_score_xz[i] + top_score_yz[i])
+				out += str(score.item())
+				out += '\t'
+				out += tgt_sentences[i+start_idx]
+				out += '\t'
+				out += src_sentences[i+start_idx]
+				out += '\n'
+			cos_xz, cos_yz, top_xz, top_yz = None, None, None, None
+
+	elif args.find_closet:
+		for bin in range(math.floor(len(src_sentences) / bin_size)):
+			print(f'{bin*bin_size} lines processed')
+			start_idx = bin * bin_size
+			end_idx = min((bin + 1) * bin_size, len(src_sentences))
+			section_embed = tgt_embedding[start_idx:end_idx, :].to(torch.device('cuda:0')) \
+			                @ (torch.transpose(hyp_embedding, 0, 1)).to(torch.device('cuda:0'))
+			scores, best_idx = torch.max(section_embed, dim=1)
+			for i in range(end_idx-start_idx):
+				out += str(scores[i].item())
+				out += '\t'
+				out += tgt_sentences[i+start_idx]
+				out += '\t'
+				out += src_sentences[best_idx[i]]
+				out += '\n'
+			# important to set None to release memory
+			section_embed = None
+			scores, best_idx = None, None
+	else:
+		# directly use cosine sim score, the default and fastest approach
+		for i in range(len(src_sentences)):
+			score = cos(tgt_embedding[i, :], hyp_embedding[i, :])
+			out += str(score.item())
+			out += '\t'
+			out += tgt_sentences[i]
+			out += '\t'
+			out += src_sentences[i]
+			out += '\n'
 	with open(f'{args.output_file}', 'w') as f4:
 		f4.write(out)
 

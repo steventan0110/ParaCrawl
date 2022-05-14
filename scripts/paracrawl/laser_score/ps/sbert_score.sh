@@ -9,18 +9,18 @@ source $ROOT/crawl/bin/activate
 # use pretrained BPE model to be consistent
 BPE_TOKENS=5000
 BPEROOT=/home/steven/Code/GITHUB/subword-nmt/subword_nmt
-datasets=$ROOT/datasets/ps/it0
+datasets=$ROOT/datasets/ps_filter
 
 mkdir -p ${datasets}/filter
 cp ${datasets}/train.ps-en.en ${datasets}/filter/ps-en.en
 cp ${datasets}/sent-sim.out ${datasets}/filter/translate.ps-en
 cp ${datasets}/train.ps-en.ps ${datasets}/filter/ps-en.ps
-# score the pair
+ score the pair
 
-python ${ROOT}/scripts/paracrawl/laser_score/sent_sim_sbert.py \
+echo "python ${ROOT}/scripts/paracrawl/laser_score/sent_sim_sbert.py \
   --lang ps \
   --src-file ${datasets}/filter/ps-en.ps \
   --tgt-file ${datasets}/filter/ps-en.en \
   --translate-file ${datasets}/filter/translate.ps-en \
   --output-file ${datasets}/filter/ps-en.score \
-  --save-dir ${datasets}/filter --iteration 0
+  --save-dir ${datasets}/filter --iteration 0"

@@ -1,7 +1,7 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 #laser_score=${ROOT}/datasets/ps/wmt20-sent.en-ps.laser-score
 #laser_file=${ROOT}/datasets/ps/wmt20-sent.en-ps
-output_dir=${ROOT}/datasets/ps_laser_it1_temp
+output_dir=${ROOT}/datasets/ps_laser_it1_filter
 mkdir -p $output_dir
 # put score together with sentence pairs
 # paste ${laser_score} ${laser_file} > ${output_dir}/ps-en.laser
@@ -16,7 +16,8 @@ for threshold in 2 3 5 7; do
     python ${ROOT}/scripts/paracrawl/laser_score/filter_corpus_with_laser.py \
       --mode word \
       --lang ps --threshold ${threshold} \
-      --input ${ROOT}/datasets/ps/it0/filter/ps-en.score --output ${output_file}
+      --input ${ROOT}/datasets/ps/it0/filter/ps-en.score --output ${output_file} \
+      --laser-file ${ROOT}/datasets/ps_laser/ps-en.laser --laser-prefilter
   fi
 done
 
@@ -33,7 +34,7 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 datasets=${output_dir}
 # use true if BPE not learned yet
-if false; then
+if true; then
   # use moses to tokenize text before BPE
   if [[ ! -e $datasets/tok ]]; then
     mkdir $datasets/tok
@@ -92,14 +93,14 @@ if false; then
 fi
 
 # apply fairseq preprocess
-#for threshold in 2 3 5 7; do
-#  fairseq-preprocess \
-#    --source-lang ps --target-lang en \
-#    --joined-dictionary \
-#    --trainpref $datasets/bpe/train.ps-en-${threshold} \
-#    --validpref $datasets/bpe/dev.ps-en-${threshold} \
-#    --testpref $datasets/bpe/test.ps-en-${threshold} \
-#    --destdir $ROOT/data-bin/ps-en-sim-${threshold} \
-#    --workers 8
-#done
+for threshold in 2 3 5 7; do
+  fairseq-preprocess \
+    --source-lang ps --target-lang en \
+    --joined-dictionary \
+    --trainpref $datasets/bpe/train.ps-en-${threshold} \
+    --validpref $datasets/bpe/dev.ps-en-${threshold} \
+    --testpref $datasets/bpe/test.ps-en-${threshold} \
+    --destdir $ROOT/data-bin/ps-sim-filter-${threshold} \
+    --workers 8
+done
 

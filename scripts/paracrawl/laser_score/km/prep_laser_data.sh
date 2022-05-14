@@ -1,22 +1,22 @@
 ROOT=/home/steven/Code/GITHUB/ParaCrawl
 laser_score=${ROOT}/datasets/km/wmt20-sent.en-km.laser-score
 laser_file=${ROOT}/datasets/km/wmt20-sent.en-km
-output_dir=${ROOT}/datasets/km_sim_it1
+output_dir=${ROOT}/datasets/km_laser
 mkdir -p $output_dir
 # put score together with sentence pairs
 # paste ${laser_score} ${laser_file} > ${output_dir}/km-en.laser
-cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.km-en.km ${output_dir}/dev.km-en.km
-cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.km-en.en ${output_dir}/dev.km-en.en
-cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.km-en.km ${output_dir}/test.km-en.km
-cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.km-en.en ${output_dir}/test.km-en.en
+#cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.km-en.km ${output_dir}/dev.km-en.km
+#cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.devtest.km-en.en ${output_dir}/dev.km-en.en
+#cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.km-en.km ${output_dir}/test.km-en.km
+#cp ${ROOT}/datasets/pskm-dev-tools/dev-sets/wikipedia.test.km-en.en ${output_dir}/test.km-en.en
 output_file=${output_dir}/train.km-en
-for threshold in 2 3 5 7; do
+for threshold in 9; do
   if [ ! -e ${output_file}-${threshold}.en ]; then
     echo "filter corpus with threshold score to certain #lines " $threshold
     python ${ROOT}/scripts/paracrawl/laser_score/filter_corpus_with_laser.py \
       --mode word \
       --lang km --threshold ${threshold} \
-      --input ${ROOT}/datasets/km/it0-filter/filter/km-en.score --output ${output_file}
+      --input ${ROOT}/datasets/km_laser/km-en.laser --output ${output_file}
   fi
 done
 
@@ -33,13 +33,13 @@ ROOT=/home/steven/Code/GITHUB/ParaCrawl
 source $ROOT/crawl/bin/activate
 datasets=${output_dir}
 # use true if BPE not learned yet
-if true; then
+if false; then
   # use moses to tokenize text before BPE
-  if [[ ! -e $datasets/tok ]]; then
+ #if [[ ! -e $datasets/tok ]]; then
     mkdir $datasets/tok
     for mode in train dev test; do
       for l in km en; do
-        for threshold in 2 3 5 7; do
+        for threshold in 9; do
           if [ $mode == 'train' ]; then
             cat ${datasets}/${mode}.km-en-${threshold}.$l | \
               perl $norm_punc $l | \
@@ -54,12 +54,12 @@ if true; then
           done
       done
     done
-  fi
+  #fi
 
 
-  if [[ ! -e $datasets/bpe ]]; then
+  #if [[ ! -e $datasets/bpe ]]; then
     mkdir $datasets/bpe
-    for threshold in 2 3 5 7; do
+    for threshold in 9; do
       TRAIN=$datasets/bpe/train.km-en-${threshold}
       rm -f $TRAIN
       for l in km en; do
@@ -88,18 +88,18 @@ if true; then
           done
       done
     done
-  fi
+  #fi
 fi
 
 # apply fairseq preprocess
-for threshold in 2 3 5 7; do
+for threshold in 9; do
   fairseq-preprocess \
     --source-lang km --target-lang en \
     --joined-dictionary \
     --trainpref $datasets/bpe/train.km-en-${threshold} \
     --validpref $datasets/bpe/dev.km-en-${threshold} \
     --testpref $datasets/bpe/test.km-en-${threshold} \
-    --destdir $ROOT/data-bin/km-sim-${threshold} \
+    --destdir $ROOT/data-bin/km-en-laser-${threshold} \
     --workers 8
 done
 
